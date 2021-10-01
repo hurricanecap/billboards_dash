@@ -9,7 +9,6 @@ from scipy import spatial
 
 def check_password():
     """Returns `True` if correct password is entered."""
-    return True
     # Show text field for password.
     # You can move this anywhere on the page!
     password = st.sidebar.text_input("Password", type="password")
