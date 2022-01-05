@@ -123,6 +123,7 @@ bill_hot['street'] = bill_hot.apply(lambda x: format_loc(x['geocode'], 'short_st
 bill_hot['status'] = bill_hot.apply(lambda x: x['status']['online'], axis=1)
 #bill_hot['link'] = bill_hot.apply(lambda x: get_link(x['address']), axis=1)
 bill_hot['reward scale'] = bill_hot['reward_scale']
+bill_hot['name'] = bill_hot.apply(lambda x: x['name'].replace("-"," "),axis=1)
 
 bill_hot['all earnings'] = bill_hot.apply(lambda x: get_all_earnings_data(x['address'],x['timestamp_added']) ,axis=1)
 bill_hot['day earnings'] = bill_hot.apply(lambda x: day_earnings(pd.DataFrame(x['all earnings'])), axis=1)
