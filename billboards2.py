@@ -121,7 +121,7 @@ bill_hot = pd.DataFrame(sending_request('https://api.helium.io/v1/accounts/'+acc
 bill_hot['city'] = bill_hot.apply(lambda x: format_loc(x['geocode'], 'short_city'),axis=1)
 bill_hot['street'] = bill_hot.apply(lambda x: format_loc(x['geocode'], 'short_street'),axis=1)
 bill_hot['status'] = bill_hot.apply(lambda x: x['status']['online'], axis=1)
-#bill_hot['link'] = bill_hot.apply(lambda x: get_link(x['address']), axis=1)
+bill_hot['link'] = bill_hot.apply(lambda x: get_link(x['address']), axis=1)
 bill_hot['reward scale'] = bill_hot['reward_scale']
 bill_hot['name'] = bill_hot.apply(lambda x: x['name'].replace("-"," "),axis=1)
 
@@ -133,7 +133,7 @@ bill_hot['month earnings'] = bill_hot.apply(lambda x: month_earnings(pd.DataFram
 bill_hot['total mined'] = bill_hot.apply(lambda x: total_earnings(pd.DataFrame(x['all earnings'])), axis=1)
 
 new_hotspots = bill_hot[['name','city', 'street','status', 'reward scale', 'day earnings',
-           'month earnings','total mined']].sort_values(by='total mined', ascending = False)
+           'month earnings','total mined', 'link']].sort_values(by='total mined', ascending = False)
 new_hotspots = add_total_avg(new_hotspots)
 new_hotspots = new_hotspots.round(2)
 new_hotspots = new_hotspots.astype('str')
@@ -142,20 +142,34 @@ new_hotspots = new_hotspots.set_index('name')
 
 if check_password():
     st.sidebar.write("## Helium Hotspots")
-    total_earnings = sending_request('https://api.helium.io/v1/accounts/'+ account +'/rewards/sum?min_time=2021-06-01T00:00:00')['sum']
-    helium_price = sending_request('https://api.helium.io/v1/oracle/prices/current')['price']/100000000
-    
-    earned = pd.DataFrame([{'HNT': str(round(total_earnings/100000000,2)), '$': str(round(total_earnings/100000000*helium_price,2))}, {'HNT': str(round((total_earnings/100000000)/len(bill_hot),2)), '$': str(round(((total_earnings/100000000)/len(bill_hot))*helium_price,2))}])
-    earned.index = ['total earnings', 'average earnings']
-    earned
-
-    quantiles = bill_hot[['total mined']].quantile(q=[1,.75,.5,.25], axis= 0)
-    quantiles.index = ['100%','75%','50%','25%']
-    quantiles.columns = ['earnings quartiles']
-    quantiles['earnings quartiles'] = quantiles.apply(lambda x: round(x['earnings quartiles'],2), axis = 1)
-    quantiles
-    
     filt = st.sidebar.selectbox('Filter Online/Offline', ['All', 'Online','Offline'])
+
+    st.write("## Hotspot Rollup")
+    all_earnings = round(sending_request('https://api.helium.io/v1/accounts/'+ account +'/rewards/sum?min_time=2021-06-01T00:00:00')['sum']/100000000, 2)
+    helium_price = round(sending_request('https://api.helium.io/v1/oracle/prices/current')['price']/100000000,2)
+
+    names = ['Current HNT Price','Total HNT Mined Since Inception','Total $ Earned Since Inception','Total Hotspots Connected to HBP Wallet','Total Online','Average Transmit Scale']
+    num_online = len(bill_hot[bill_hot['status']=='online'])
+    avg_transmit = bill_hot['reward scale'].mean()
+    values = [str(helium_price), str(all_earnings), str(round(helium_price*all_earnings,2)), str(len(bill_hot)),str(num_online), str(round(avg_transmit,2))]
+
+    df = pd.DataFrame(list(zip(names, values)),
+                   columns =['', 'current'])
+    df = df.set_index('')
+    df
+
+    row_names=['24 hour','7 day','14 day','30 day','lifetime']
+    columns_names = ['Time','Average','Median','Aggregate']
+    avg_earnings = [bill_hot['day earnings'].mean(), bill_hot['week earnings'].mean(),bill_hot['two week earnings'].mean(),bill_hot['month earnings'].mean(), bill_hot['total mined'].mean()]
+    median_earnings = [bill_hot['day earnings'].median(), bill_hot['week earnings'].median(),bill_hot['two week earnings'].median(),bill_hot['month earnings'].median(), bill_hot['total mined'].median()]
+    agg_earnings = [bill_hot['day earnings'].sum(), bill_hot['week earnings'].sum(),bill_hot['two week earnings'].sum(),bill_hot['month earnings'].sum(), bill_hot['total mined'].sum()]
+
+    earned_df = pd.DataFrame(list(zip(row_names, avg_earnings,median_earnings,agg_earnings )),
+                   columns =columns_names)
+    earned_df = earned_df.set_index('Time')
+    earned_df
+    
+    st.write('## Hotspot Breakdown')
     if filt == 'Online':
         filtered = new_hotspots[new_hotspots['status']== 'online']
         hot_data = filtered.style.apply(lambda x: ['background: lightsteelblue' if x.name in ['TOTAL','AVERAGE'] else '' for i in x], axis=1)
