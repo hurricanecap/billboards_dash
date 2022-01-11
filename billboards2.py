@@ -83,7 +83,7 @@ def first_earning(earnings_data):
         return None
     first_earned = min(formatted_dt)
     formatted_str = first_earned.strftime("%b") + ' '+ str(first_earned.day) + ' '+ str(first_earned.year)
-
+    return formatted_str
 def color_status(val):
     color = 'white'
     try:
