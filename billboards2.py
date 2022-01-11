@@ -193,8 +193,8 @@ if check_password():
     row_names=['24 hour','7 day','14 day','30 day','lifetime']
     columns_names = ['Time','Avg Composite','Avg Online','Aggregate']
     avg_earnings = [str(round(bill_hot['day earnings'].mean(),2)), str(round(bill_hot['week earnings'].mean(),2)),str(round(bill_hot['two week earnings'].mean(),2)),str(round(bill_hot['month earnings'].mean(),2)), str(round(bill_hot['total mined'].mean(),2))]
-hots_online_24 = bill_hot[(bill_hot['status']=='online')&(bill_hot['days online']>=1)]
     
+    hots_online_24 = bill_hot[(bill_hot['status']=='online')&(bill_hot['days online']>=1)]
     hots_online_7 = bill_hot[(bill_hot['status']=='online')&(bill_hot['days online']>=7)]
     hots_online_14 = bill_hot[(bill_hot['status']=='online')&(bill_hot['days online']>=14)]
     hots_online_30 = bill_hot[(bill_hot['status']=='online')&(bill_hot['days online']>=30)]
