@@ -177,11 +177,11 @@ if check_password():
 
     row_names=['24 hour','7 day','14 day','30 day','lifetime']
     columns_names = ['Time','Avg Composite','Avg Online','Aggregate']
-    avg_earnings = [bill_hot['day earnings'].mean(), bill_hot['week earnings'].mean(),bill_hot['two week earnings'].mean(),bill_hot['month earnings'].mean(), bill_hot['total mined'].mean()]
-    avg_online_earnings = [bill_hot[bill_hot['status']=='online']['day earnings'].mean(), bill_hot[bill_hot['status']=='online']['week earnings'].mean(),bill_hot[bill_hot['status']=='online']['two week earnings'].mean(),bill_hot[bill_hot['status']=='online']['month earnings'].mean(), bill_hot[bill_hot['status']=='online']['total mined'].mean()]
+        avg_earnings = [str(round(bill_hot['day earnings'].mean(),2)), str(round(bill_hot['week earnings'].mean(),2)),str(round(bill_hot['two week earnings'].mean(),2)),str(round(bill_hot['month earnings'].mean(),2)), str(round(bill_hot['total mined'].mean(),2))]
+    avg_online_earnings =[ str(round(bill_hot[bill_hot['status']=='online']['day earnings'].mean(),2)), str(round(bill_hot[bill_hot['status']=='online']['week earnings'].mean(),2)),str(round(bill_hot[bill_hot['status']=='online']['two week earnings'].mean(),2)),str(round(bill_hot[bill_hot['status']=='online']['month earnings'].mean(),2)), str(round(bill_hot[bill_hot['status']=='online']['total mined'].mean(),2))]
     
-    agg_earnings = [bill_hot['day earnings'].sum(), bill_hot['week earnings'].sum(),bill_hot['two week earnings'].sum(),bill_hot['month earnings'].sum(), bill_hot['total mined'].sum()]
-
+    agg_earnings = [str(round(bill_hot['day earnings'].sum(),2)), str(round(bill_hot['week earnings'].sum(),2)),str(round(bill_hot['two week earnings'].sum(),2)),str(round(bill_hot['month earnings'].sum(),2)), str(round(bill_hot['total mined'].sum(),2))]
+    
     earned_df = pd.DataFrame(list(zip(row_names, avg_earnings,avg_online_earnings,agg_earnings )),
                    columns =columns_names)
     earned_df = earned_df.set_index('Time')
