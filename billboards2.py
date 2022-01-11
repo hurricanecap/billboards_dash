@@ -177,7 +177,7 @@ if check_password():
 
     row_names=['24 hour','7 day','14 day','30 day','lifetime']
     columns_names = ['Time','Avg Composite','Avg Online','Aggregate']
-        avg_earnings = [str(round(bill_hot['day earnings'].mean(),2)), str(round(bill_hot['week earnings'].mean(),2)),str(round(bill_hot['two week earnings'].mean(),2)),str(round(bill_hot['month earnings'].mean(),2)), str(round(bill_hot['total mined'].mean(),2))]
+    avg_earnings = [str(round(bill_hot['day earnings'].mean(),2)), str(round(bill_hot['week earnings'].mean(),2)),str(round(bill_hot['two week earnings'].mean(),2)),str(round(bill_hot['month earnings'].mean(),2)), str(round(bill_hot['total mined'].mean(),2))]
     avg_online_earnings =[ str(round(bill_hot[bill_hot['status']=='online']['day earnings'].mean(),2)), str(round(bill_hot[bill_hot['status']=='online']['week earnings'].mean(),2)),str(round(bill_hot[bill_hot['status']=='online']['two week earnings'].mean(),2)),str(round(bill_hot[bill_hot['status']=='online']['month earnings'].mean(),2)), str(round(bill_hot[bill_hot['status']=='online']['total mined'].mean(),2))]
     
     agg_earnings = [str(round(bill_hot['day earnings'].sum(),2)), str(round(bill_hot['week earnings'].sum(),2)),str(round(bill_hot['two week earnings'].sum(),2)),str(round(bill_hot['month earnings'].sum(),2)), str(round(bill_hot['total mined'].sum(),2))]
