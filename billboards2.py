@@ -114,7 +114,7 @@ def add_total_avg(df):
     d_total['city'] = " "
     d_total['link'] = ''
     d_total['reward scale'] = 0
-    d_total['date synced'] = ''
+    d_total['date deployed'] = ''
 
     d = dict(df.mean(axis =0, numeric_only = True))
     d['name'] = 'AVERAGE'
@@ -122,7 +122,7 @@ def add_total_avg(df):
     d['status'] = " "
     d['city'] = " "
     d['link']=" "
-    d['date synced']= " "
+    d['date deployed']= " "
 
     df = df.append(d, ignore_index = True)  
     df = df.append(d_total, ignore_index = True)
@@ -146,10 +146,10 @@ bill_hot['two week earnings'] = bill_hot.apply(lambda x: two_week_earnings(pd.Da
 bill_hot['month earnings'] = bill_hot.apply(lambda x: month_earnings(pd.DataFrame(x['all earnings'])), axis=1)
 bill_hot['total mined'] = bill_hot.apply(lambda x: total_earnings(pd.DataFrame(x['all earnings'])), axis=1)
 
-bill_hot['date synced'] = bill_hot.apply(lambda x: first_earning(x['all earnings']), axis=1) 
+bill_hot['date deployed'] = bill_hot.apply(lambda x: first_earning(x['all earnings']), axis=1) 
 
 new_hotspots = bill_hot[['name','city', 'street','status', 'reward scale', 'day earnings',
-           'month earnings','total mined','date synced','link']].sort_values(by='total mined', ascending = False)
+           'month earnings','total mined','date deployed','link']].sort_values(by='total mined', ascending = False)
 new_hotspots = add_total_avg(new_hotspots)
 new_hotspots = new_hotspots.round(2)
 new_hotspots = new_hotspots.astype('str')
