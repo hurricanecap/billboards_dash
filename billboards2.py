@@ -78,12 +78,27 @@ def convert_to_dollars(hnt):
         helium_price = sending_request('https://api.helium.io/v1/oracle/prices/current')['price']/100000000
         return str(round(float(hnt)*helium_price,2))
 def first_earning(earnings_data):
-    formatted_dt = [dt.datetime.fromisoformat(d['timestamp'][:-1]) for d in earnings_data if d['total']!= 0 and d['timestamp']!=None]
+    formatted_dt = []
+    for d in earnings_data:
+        if d['total'] != 0:
+            if d['timestamp'] != None:
+                formatted_dt.append(dt.datetime.fromisoformat(d['timestamp'][:-1]))
     if len(formatted_dt)==0:
         return None
     first_earned = min(formatted_dt)
     formatted_str = first_earned.strftime("%b") + ' '+ str(first_earned.day) + ' '+ str(first_earned.year)
     return formatted_str
+def days_online(earnings_data):
+    formatted_dt = []
+    for d in earnings_data:
+        if d['total'] != 0:
+            if d['timestamp'] != None:
+                formatted_dt.append(dt.datetime.fromisoformat(d['timestamp'][:-1]))
+    if len(formatted_dt)==0:
+        return 0
+    first_earned = min(formatted_dt)
+    diff =  dt.datetime.now() - first_earned
+    return diff.days
 def color_status(val):
     color = 'white'
     try:
@@ -147,6 +162,7 @@ bill_hot['month earnings'] = bill_hot.apply(lambda x: month_earnings(pd.DataFram
 bill_hot['total mined'] = bill_hot.apply(lambda x: total_earnings(pd.DataFrame(x['all earnings'])), axis=1)
 
 bill_hot['date deployed'] = bill_hot.apply(lambda x: first_earning(x['all earnings']), axis=1) 
+bill_hot['days online'] = bill_hot.apply(lambda x: days_online(x['all earnings']), axis=1)
 
 new_hotspots = bill_hot[['name','city', 'street','status', 'reward scale', 'day earnings',
            'month earnings','total mined','date deployed','link']].sort_values(by='total mined', ascending = False)
@@ -177,7 +193,13 @@ if check_password():
     row_names=['24 hour','7 day','14 day','30 day','lifetime']
     columns_names = ['Time','Avg Composite','Avg Online','Aggregate']
     avg_earnings = [str(round(bill_hot['day earnings'].mean(),2)), str(round(bill_hot['week earnings'].mean(),2)),str(round(bill_hot['two week earnings'].mean(),2)),str(round(bill_hot['month earnings'].mean(),2)), str(round(bill_hot['total mined'].mean(),2))]
-    avg_online_earnings =[ str(round(bill_hot[bill_hot['status']=='online']['day earnings'].mean(),2)), str(round(bill_hot[bill_hot['status']=='online']['week earnings'].mean(),2)),str(round(bill_hot[bill_hot['status']=='online']['two week earnings'].mean(),2)),str(round(bill_hot[bill_hot['status']=='online']['month earnings'].mean(),2)), str(round(bill_hot[bill_hot['status']=='online']['total mined'].mean(),2))]
+hots_online_24 = bill_hot[(bill_hot['status']=='online')&(bill_hot['days online']>=1)]
+    
+    hots_online_7 = bill_hot[(bill_hot['status']=='online')&(bill_hot['days online']>=7)]
+    hots_online_14 = bill_hot[(bill_hot['status']=='online')&(bill_hot['days online']>=14)]
+    hots_online_30 = bill_hot[(bill_hot['status']=='online')&(bill_hot['days online']>=30)]
+
+    avg_online_earnings =[str(round(hots_online_24['day earnings'].mean(),2)), str(round(hots_online_7['week earnings'].mean(),2)),str(round(hots_online_14['two week earnings'].mean(),2)),str(round(hots_online_30['month earnings'].mean(),2)), str(round(hots_online_30['total mined'].mean(),2))]    
     
     agg_earnings = [str(round(bill_hot['day earnings'].sum(),2)), str(round(bill_hot['week earnings'].sum(),2)),str(round(bill_hot['two week earnings'].sum(),2)),str(round(bill_hot['month earnings'].sum(),2)), str(round(bill_hot['total mined'].sum(),2))]
     
