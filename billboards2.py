@@ -4,6 +4,8 @@ import requests
 import time
 import sys
 import streamlit as st
+import datetime as dt
+
 
 def check_password():
     """Returns `True` if correct password is entered."""
@@ -72,6 +74,17 @@ def total_earnings(earnings):
     return earnings['total'].sum()
 def get_link(address):
     return 'https://explorer.helium.com/hotspots/'+ address
+def convert_to_dollars(hnt):
+        helium_price = sending_request('https://api.helium.io/v1/oracle/prices/current')['price']/100000000
+        return round(hnt*helium_price,2)
+def first_earning(earnings_data):
+    formatted_dt = [dt.datetime.fromisoformat(d['timestamp'][:-1]) for d in earnings_data if d['total']!= 0]
+    if len(formatted_dt)==0:
+        return None
+    first_earned = min(formatted_dt)
+    formatted_str = first_earned.strftime("%b") + ' '+ str(first_earned.day) + ' '+ str(first_earned.year)
+    return formatted_str
+
 def color_status(val):
     color = 'white'
     try:
@@ -100,15 +113,17 @@ def add_total_avg(df):
     d_total['street'] = " "
     d_total['status'] = " "
     d_total['city'] = " "
-    #d_total['link'] = ''
+    d_total['link'] = ''
     d_total['reward scale'] = 0
+    d_total['date synced'] = ''
 
     d = dict(df.mean(axis =0, numeric_only = True))
     d['name'] = 'AVERAGE'
     d['street'] = " "
     d['status'] = " "
     d['city'] = " "
-    #d['link']=" "
+    d['link']=" "
+    d['date synced']= " "
 
     df = df.append(d, ignore_index = True)  
     df = df.append(d_total, ignore_index = True)
@@ -132,8 +147,10 @@ bill_hot['two week earnings'] = bill_hot.apply(lambda x: two_week_earnings(pd.Da
 bill_hot['month earnings'] = bill_hot.apply(lambda x: month_earnings(pd.DataFrame(x['all earnings'])), axis=1)
 bill_hot['total mined'] = bill_hot.apply(lambda x: total_earnings(pd.DataFrame(x['all earnings'])), axis=1)
 
+bill_hot['date synced'] = bill_hot.apply(lambda x: first_earning(x['all earnings']), axis=1) 
+
 new_hotspots = bill_hot[['name','city', 'street','status', 'reward scale', 'day earnings',
-           'month earnings','total mined', 'link']].sort_values(by='total mined', ascending = False)
+           'month earnings','total mined','date synced','link']].sort_values(by='total mined', ascending = False)
 new_hotspots = add_total_avg(new_hotspots)
 new_hotspots = new_hotspots.round(2)
 new_hotspots = new_hotspots.astype('str')
@@ -159,15 +176,21 @@ if check_password():
     df
 
     row_names=['24 hour','7 day','14 day','30 day','lifetime']
-    columns_names = ['Time','Average','Median','Aggregate']
+    columns_names = ['Time','Avg Composite','Avg Online','Aggregate']
     avg_earnings = [bill_hot['day earnings'].mean(), bill_hot['week earnings'].mean(),bill_hot['two week earnings'].mean(),bill_hot['month earnings'].mean(), bill_hot['total mined'].mean()]
-    median_earnings = [bill_hot['day earnings'].median(), bill_hot['week earnings'].median(),bill_hot['two week earnings'].median(),bill_hot['month earnings'].median(), bill_hot['total mined'].median()]
+    avg_online_earnings = [bill_hot[bill_hot['status']=='online']['day earnings'].mean(), bill_hot[bill_hot['status']=='online']['week earnings'].mean(),bill_hot[bill_hot['status']=='online']['two week earnings'].mean(),bill_hot[bill_hot['status']=='online']['month earnings'].mean(), bill_hot[bill_hot['status']=='online']['total mined'].mean()]
+    
     agg_earnings = [bill_hot['day earnings'].sum(), bill_hot['week earnings'].sum(),bill_hot['two week earnings'].sum(),bill_hot['month earnings'].sum(), bill_hot['total mined'].sum()]
 
-    earned_df = pd.DataFrame(list(zip(row_names, avg_earnings,median_earnings,agg_earnings )),
+    earned_df = pd.DataFrame(list(zip(row_names, avg_earnings,avg_online_earnings,agg_earnings )),
                    columns =columns_names)
     earned_df = earned_df.set_index('Time')
-    earned_df
+    earned_df['Avg Composite $'] = earned_df.apply(lambda x: convert_to_dollars(x['Avg Composite']),axis=1)
+    earned_df['Avg Online $'] = earned_df.apply(lambda x: convert_to_dollars(x['Avg Online']),axis=1)
+    earned_df['Aggregate $'] = earned_df.apply(lambda x: convert_to_dollars(x['Aggregate']),axis=1)
+    earned = earned_df[['Avg Composite','Avg Composite $','Avg Online', 'Avg Online $', 'Aggregate', 'Aggregate $']]
+    earned.columns = ['Avg Composite','in $ ','Avg Online', ' in $', 'Aggregate', ' in $ ']
+    earned
     
     st.write('## Hotspot Breakdown')
     if filt == 'Online':
