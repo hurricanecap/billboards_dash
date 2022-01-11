@@ -76,7 +76,7 @@ def get_link(address):
     return 'https://explorer.helium.com/hotspots/'+ address
 def convert_to_dollars(hnt):
         helium_price = sending_request('https://api.helium.io/v1/oracle/prices/current')['price']/100000000
-        return round(hnt*helium_price,2)
+        return str(round(hnt*helium_price,2))
 def first_earning(earnings_data):
     formatted_dt = [dt.datetime.fromisoformat(d['timestamp'][:-1]) for d in earnings_data if d['total']!= 0]
     if len(formatted_dt)==0:
