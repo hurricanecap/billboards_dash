@@ -78,12 +78,11 @@ def convert_to_dollars(hnt):
         helium_price = sending_request('https://api.helium.io/v1/oracle/prices/current')['price']/100000000
         return str(round(float(hnt)*helium_price,2))
 def first_earning(earnings_data):
-    formatted_dt = [dt.datetime.fromisoformat(d['timestamp'][:-1]) for d in earnings_data if d['total']!= 0]
+    formatted_dt = [dt.datetime.fromisoformat(d['timestamp'][:-1]) for d in earnings_data if d['total']!= 0 and d['timestamp']!=None]
     if len(formatted_dt)==0:
         return None
     first_earned = min(formatted_dt)
     formatted_str = first_earned.strftime("%b") + ' '+ str(first_earned.day) + ' '+ str(first_earned.year)
-    return formatted_str
 
 def color_status(val):
     color = 'white'
