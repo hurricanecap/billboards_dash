@@ -79,6 +79,8 @@ def convert_to_dollars(hnt):
         return str(round(float(hnt)*helium_price,2))
 def first_earning(earnings_data):
     formatted_dt = []
+    if earnings_data ==None:
+        return None
     for d in earnings_data:
         if d['total'] != 0:
             if d['timestamp'] != None:
@@ -90,6 +92,8 @@ def first_earning(earnings_data):
     return formatted_str
 def days_online(earnings_data):
     formatted_dt = []
+    if earnings_data ==None:
+        return None
     for d in earnings_data:
         if d['total'] != 0:
             if d['timestamp'] != None:
@@ -99,6 +103,7 @@ def days_online(earnings_data):
     first_earned = min(formatted_dt)
     diff =  dt.datetime.now() - first_earned
     return diff.days
+
 def color_status(val):
     color = 'white'
     try:
