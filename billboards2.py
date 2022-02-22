@@ -169,7 +169,7 @@ bill_hot['total mined'] = bill_hot.apply(lambda x: total_earnings(pd.DataFrame(x
 bill_hot['date deployed'] = bill_hot.apply(lambda x: first_earning(x['all earnings']), axis=1) 
 bill_hot['days online'] = bill_hot.apply(lambda x: days_online(x['all earnings']), axis=1)
 
-new_hotspots = bill_hot[['name','city', 'street','status', 'reward scale', 'day earnings',
+new_hotspots = bill_hot[['name','city', 'street','status', 'reward scale', 'day earnings','week earnings',
            'month earnings','total mined','date deployed','link']].sort_values(by='total mined', ascending = False)
 new_hotspots = add_total_avg(new_hotspots)
 new_hotspots = new_hotspots.round(2)
