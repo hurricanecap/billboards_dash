@@ -132,6 +132,7 @@ def add_total_avg(df):
     d_total['street'] = " "
     d_total['status'] = " "
     d_total['city'] = " "
+    d_total['state'] = " "
     d_total['link'] = ''
     d_total['reward scale'] = 0
     d_total['date deployed'] = ''
@@ -141,6 +142,7 @@ def add_total_avg(df):
     d['street'] = " "
     d['status'] = " "
     d['city'] = " "
+    d['state']= " "
     d['link']=" "
     d['date deployed']= " "
 
@@ -154,6 +156,8 @@ bill_hot = pd.DataFrame(sending_request('https://api.helium.io/v1/accounts/'+acc
 
 bill_hot['city'] = bill_hot.apply(lambda x: format_loc(x['geocode'], 'short_city'),axis=1)
 bill_hot['street'] = bill_hot.apply(lambda x: format_loc(x['geocode'], 'short_street'),axis=1)
+bill_hot['state'] = bill_hot.apply(lambda x: x['geocode']['short_state'],axis=1)
+
 bill_hot['status'] = bill_hot.apply(lambda x: x['status']['online'], axis=1)
 bill_hot['link'] = bill_hot.apply(lambda x: get_link(x['address']), axis=1)
 bill_hot['reward scale'] = bill_hot['reward_scale']
@@ -169,7 +173,7 @@ bill_hot['total mined'] = bill_hot.apply(lambda x: total_earnings(pd.DataFrame(x
 bill_hot['date deployed'] = bill_hot.apply(lambda x: first_earning(x['all earnings']), axis=1) 
 bill_hot['days online'] = bill_hot.apply(lambda x: days_online(x['all earnings']), axis=1)
 
-new_hotspots = bill_hot[['name','city', 'street','status', 'reward scale', 'day earnings','week earnings',
+new_hotspots = bill_hot[['name','city', 'street','state','status', 'reward scale', 'day earnings','week earnings',
            'month earnings','total mined','date deployed','link']].sort_values(by='total mined', ascending = False)
 new_hotspots = add_total_avg(new_hotspots)
 new_hotspots = new_hotspots.round(2)
@@ -180,6 +184,9 @@ new_hotspots = new_hotspots.set_index('name')
 if check_password():
     st.sidebar.write("## Helium Hotspots")
     filt = st.sidebar.selectbox('Filter Online/Offline', ['All', 'Online','Offline'])
+    cali = st.sidebar.selectbox('Filter California', ['All','Exclude California'])
+    if cali == 'Exclude California':
+        new_hotspots = new_hotspots[new_hotspots['state']!= 'CA'].reset_index(drop=True)
 
     st.write("## Hotspot Rollup")
     all_earnings = round(sending_request('https://api.helium.io/v1/accounts/'+ account +'/rewards/sum?min_time=2021-06-01T00:00:00')['sum']/100000000, 2)
