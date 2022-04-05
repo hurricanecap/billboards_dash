@@ -32,7 +32,7 @@ def sending_request(url, cursor=None):
         else:
             return data['data']
     else:
-        time.sleep(10)
+        time.sleep(20)
         sending_request(url, cursor)
 def format_loc(loc_dic, key):
     if loc_dic[key] != None:
