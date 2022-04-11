@@ -22,17 +22,23 @@ def check_password():
             st.sidebar.error("😕 Password incorrect")
     return False
 def sending_request(url, cursor=None):
-    r = requests.get(url=url, params = {'cursor':cursor}, headers={'user-agent':'dash_v1.ipynb/0.0.1'})
-    data = r.json()
-    if 'data' in data:
-        if 'cursor' in data:
-            print(url+'?cursor='+data['cursor'])
-            return data['data'] + send_req(url, data['cursor'])
+    time.sleep(1)
+    r = requests.get(url=url, params = {'cursor':cursor}, headers={'user-agent':'dash_v1.ipynb/0.0.2'})
+    try:
+        data = r.json()
+        if 'data' in data:
+            if 'cursor' in data:
+                print(url+'?cursor='+data['cursor'])
+                return data['data'] + send_req(url, data['cursor'])
 
+            else:
+                return data['data']
         else:
-            return data['data']
-    else:
-        time.sleep(20)
+            time.sleep(10)
+            sending_request(url, cursor)
+    except Exception as e:
+        print(e)
+        time.sleep(2)
         sending_request(url, cursor)
 def format_loc(loc_dic, key):
     if loc_dic[key] != None:
